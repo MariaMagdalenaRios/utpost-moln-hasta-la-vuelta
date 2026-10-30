@@ -73,3 +73,4 @@ Pipelinen (jobbet *Image* i `.github/workflows/ci.yml`) bygger `api` och `client
 ## Deploy
 
 Se *I molnet (M6)* ovan: staging skapas en gång med `infra/azure/skapa-staging.sh`, och pipelinen byter image vid varje merge till `main`.
+Staging kör i **Azure Container Apps** som en app med fyra containrar (`infra/azure/staging.yaml`). Skapa den en gång med `infra/azure/skapa-staging.sh`, ge pipelinen en identitet med `infra/azure/identitet.sh` (OIDC – inga lösenord i GitHub, bara id:n som variabler på miljön `azure-staging`); därefter deployar pipelinen vid varje merge till `main` (jobbet *Deploy → Azure staging*, se `docs/pipeline.md`): byter image till commitens sha, väntar tills `/api/health` svarar med samma sha, röktestar `/graphql`. Appen skalar till noll mellan passen: första anropet väcker den (räkna med en minut), och databaserna seedas om vid varje kallstart (`SEED_ON_START=1`). Beslutet och alternativen står i `docs/decisions/hosting.md`.
